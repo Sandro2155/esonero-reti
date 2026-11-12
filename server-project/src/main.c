@@ -52,7 +52,7 @@ static const unit_t UNITS[] = {
 		{"yd", LENGTH, 0.9144}, {"mi", LENGTH, 1609.344},
 		{"g", MASS, 0.001}, {"kg", MASS, 1.0}, {"oz", MASS, 0.028349523},
 		{"lb", MASS, 0.45359237},
-}
+};
 
 /*
  * Converts a value from one unit to another of the same quantity.
@@ -114,13 +114,70 @@ int main(int argc, char *argv[]) {
 
 	// TODO: Implement connection acceptance loop
 	struct sockaddr_in client_addr;
+	int client_socket;
 	 while (1) {
-	     int client_socket = accept(my_socket, (struct sockaddr *) &client_addr, &sizeof(client_addr));
+		 client_socket = accept(my_socket, (struct sockaddr *) &client_addr, sizeof(client_addr));
+
+	     if(client_socket < 0){
+	    	 printf("accept failed.\n");
+	    	 closesocket(client_socket);
+	    	 clearwinsock();
+	    	 return 0;
+	     }
 	     // Handle client communication
+
+	     printf("handling client %s\n", inet_ntoa(client_addr.sin_addr));
+
+	     conversion_request_t client_request;
+	     conversion_response_t output_response;
+	     int bytes_received = recv(client_socket, &client_request, sizeof(client_request), 0);
+	     if (bytes_received > 0){
+	    	 unit_t from; //saves the first unit measure
+	    	 unit_t to; //saves the second unit measure
+	    	 int f = 0; //flag
+	    	 for(int i = 0; i < sizeof(UNITS) && f == 0; i++){
+	    		 if (strcmp(client_request.from, UNITS[i].symbol) == 0){
+	    			 f = 1; //if it's a valid unit measure, i break the for cycle
+	    			 from = UNITS[i];
+	    		 }
+	    	 } //checks if the unit measure is valid
+	    	 if (!f){
+	    		 output_response.status = STATUS_INVALID_UNIT;
+	    		 output_response.value = 0;
+	    	 } //if it isn't, it returns invalid status
+	    	 else{
+	    		 for(int i = 0; i < sizeof(UNITS) && f == 0; i++){
+	    		 	    		 if (strcmp(client_request.to, UNITS[i].symbol) == 0){
+	    		 	    			 f = 1;
+	    		 	    			 to = UNITS[i];
+	    		 	    		 }
+	    		 	    	 } //checks if the unit measure is valid
+	    		 if (!f){
+	    			 output_response.status = STATUS_INVALID_UNIT;
+	    			 output_response.value = 0;
+	    		 } //if it isn't, it returns invalid status
+	    		 else{
+	    			 if (from.quantity != to.quantity){
+	    				 output_response.status = STATUS_INCOMPATIBLE_UNITS;
+	    				 output_response.value = 0;
+	    			 } //checks if the unit measures are compatible with each other
+	    			 else {
+	    				 if (client_request.value < 0 || client_request.value > MAX_VALUE){
+	    					 output_response.status = STATUS_INVALID_VALUE;
+	    					 output_response.value = 0;
+	    				 } //checks if the value is valid
+	    				 else{
+	    					 output_response.status = STATUS_OK;
+	    					 output_response.value = (uint32_t) convert(client_request.value, from.factor, to.factor);
+	    				 } //status must be OK, so i make the conversion
+	    			 } //ends third else
+	    		 } //ends second else
+	    	 } //ends first else
+	    	 send (client_socket, &output_response, sizeof(output_response), 0);
+	     }//ends if
+
 	     closesocket(client_socket);
 	 }
-
-	 //printf("handling client %s\n", inet_ntoa(client_addr.sin_addr));
 
 	printf("Server terminated.\n");
 

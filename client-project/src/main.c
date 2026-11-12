@@ -79,7 +79,7 @@ int main(int argc, char *argv[]) {
 	memset (&client_addr, 0, sizeof(client_addr));
 
 	// TODO: Connect to server
-	if (connect(my_socket, (struct sockaddr *)&client_addr) < 0){
+	if (connect(my_socket, (struct sockaddr *)&client_addr, sizeof(client_addr)) < 0){
 		printf("failed to connect.\n");
 		closesocket(my_socket);
 		clearwinsock();
@@ -89,15 +89,31 @@ int main(int argc, char *argv[]) {
 	// TODO: Implement communication logic
 
 	conversion_request_t input_request;
+
 	printf("\tFROM\t");
 	scanf("%s", input_request.from);
+	if(strlen(input_request.from) <= 0 || strlen(input_request.from) > UNIT_LEN){
+		printf("invalid measure unit.\n");
+		closesocket(my_socket);
+		clearwinsock();
+		return 0;
+	}
+
 	printf("\tTO\t");
 	scanf("%s", input_request.to);
+	if(strlen(input_request.to) <= 0 || strlen(input_request.to) > UNIT_LEN){
+		printf("invalid measure unit.\n");
+		closesocket(my_socket);
+		clearwinsock();
+		return 0;
+	}
+
 	printf("\tvalore:\t");
 	scanf("%d", input_request.value);
-	htons(input_request.value); //converts uint32_t in network byte order
 
-	if(send(my_socket, input_request, sizeof(input_request), 0) != sizeof(input_request)) {
+	htonl(input_request.value); //converts uint32_t in network byte order
+
+	if(send(my_socket, &input_request, sizeof(input_request), 0) != sizeof(input_request)) {
 		printf("send failed or sent fewer bytes.\n");
 		closesocket(my_socket);
 		clearwinsock();
@@ -111,15 +127,15 @@ int main(int argc, char *argv[]) {
 	* conversion_response_t buffer[BUFFERSIZE];
 	* memset(buffer, 0, BUFFERSIZE);
 	*/
-	if ((bytes_received = recv(my_socket, output_response, sizeof(output_response), 0)) <= 0){
+	if ((bytes_received = recv(my_socket, &output_response, sizeof(output_response), 0)) <= 0){
 		printf("recv failed or connection closed prematurely.\n");
 		closesocket(my_socket);
 		clearwinsock();
 		return 0;
 	}
 
-	ntohs(output_response.status);
-	ntohs(output_response.value);
+	ntohl(output_response.status);
+	ntohl(output_response.value);
 	printf("%d, %d", output_response.status, output_response.value); //converts back the output and prints it
 
 	// TODO: Close socket
