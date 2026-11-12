@@ -34,6 +34,21 @@ void clearwinsock() {
 #endif
 }
 
+
+/*
+* int recv_all(int socket, conversion_request_t* buffer, int len){
+* 	int total = 0;
+* 	while (total < len){
+* 		int n = recv(socket, buffer + total, len - total, 0);
+* 		if (n <= 0){
+* 			return n;
+* 		}
+* 		total += n;
+* 	}
+* 	return total;
+* } //returns the total length of the output
+*/
+
 int main(int argc, char *argv[]) {
 
 	// TODO: Implement client logic
@@ -74,7 +89,13 @@ int main(int argc, char *argv[]) {
 	// TODO: Implement communication logic
 
 	conversion_request_t input_request;
-	scanf("%s %s %d", input_request.from, input_request.to, input_request.value);
+	printf("\tFROM\t");
+	scanf("%s", input_request.from);
+	printf("\tTO\t");
+	scanf("%s", input_request.to);
+	printf("\tvalore:\t");
+	scanf("%d", input_request.value);
+	htons(input_request.value); //converts uint32_t in network byte order
 
 	if(send(my_socket, input_request, sizeof(input_request), 0) != sizeof(input_request)) {
 		printf("send failed or sent fewer bytes.\n");
@@ -83,7 +104,23 @@ int main(int argc, char *argv[]) {
 		return 0;
 	}
 
-	recv(my_socket, );
+	int bytes_received;
+	conversion_response_t output_response;
+	/*
+	* int total_bytes_received = 0;
+	* conversion_response_t buffer[BUFFERSIZE];
+	* memset(buffer, 0, BUFFERSIZE);
+	*/
+	if ((bytes_received = recv(my_socket, output_response, sizeof(output_response), 0)) <= 0){
+		printf("recv failed or connection closed prematurely.\n");
+		closesocket(my_socket);
+		clearwinsock();
+		return 0;
+	}
+
+	ntohs(output_response.status);
+	ntohs(output_response.value);
+	printf("%d, %d", output_response.status, output_response.value); //converts back the output and prints it
 
 	// TODO: Close socket
 	closesocket(my_socket);
