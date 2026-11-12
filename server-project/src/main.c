@@ -32,8 +32,6 @@
 
 #define NO_ERROR 0
 
-#define QLEN 2 //maximum queue length for listen(). 1 was enough, but i'm using 2 just to be safe
-
 void clearwinsock() {
 #if defined WIN32
 	WSACleanup();
@@ -89,10 +87,11 @@ int main(int argc, char *argv[]) {
 		printf ("socket creation failed.\n");
 		clearwinsock();
 		return 0;
-	}
+	} //just for good measure
 
 	// TODO: Configure server address
 	struct sockaddr_in server_addr;
+	memset(&server_addr, 0, sizeof(server_addr));
 	server_addr.sin_family = AF_INET;
 	server_addr.sin_port = htons(SERVER_PORT);
 	server_addr.sin_addr.s_addr = htonl(INADDR_ANY);  // 0.0.0.0: accept connections on any interface (127.0.0.1 included)
@@ -106,7 +105,7 @@ int main(int argc, char *argv[]) {
 	} //checking if bind was successful
 
 	// TODO: Set socket to listen
-	if (listen(my_socket, QLEN) < 0) {
+	if (listen(my_socket, QUEUE_SIZE) < 0) {
 		printf("listen failed.\n");
 		closesocket (my_socket);
 		clearwinsock();

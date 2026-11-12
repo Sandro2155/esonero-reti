@@ -26,6 +26,8 @@
 
 #define NO_ERROR 0
 
+#define BUFFERSIZE 512
+
 void clearwinsock() {
 #if defined WIN32
 	WSACleanup();
@@ -49,21 +51,42 @@ int main(int argc, char *argv[]) {
 	int my_socket;
 
 	// TODO: Create socket
-	// my_socket = socket(...);
+	my_socket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+
+	if (my_socket < 0){
+		printf("socket creation failed.\n");
+		clearwinsock();
+		return 0;
+	} //just for good measure
 
 	// TODO: Configure server address
-	// struct sockaddr_in server_addr;
-	// ...
+	struct sockaddr_in client_addr;
+	memset (&client_addr, 0, sizeof(client_addr));
 
 	// TODO: Connect to server
-	// connect(...);
+	if (connect(my_socket, (struct sockaddr *)&client_addr) < 0){
+		printf("failed to connect.\n");
+		closesocket(my_socket);
+		clearwinsock();
+		return 0;
+	}
 
 	// TODO: Implement communication logic
-	// send(...);
-	// recv(...);
+
+	conversion_request_t input_request;
+	scanf("%s %s %d", input_request.from, input_request.to, input_request.value);
+
+	if(send(my_socket, input_request, sizeof(input_request), 0) != sizeof(input_request)) {
+		printf("send failed or sent fewer bytes.\n");
+		closesocket(my_socket);
+		clearwinsock();
+		return 0;
+	}
+
+	recv(my_socket, );
 
 	// TODO: Close socket
-	// closesocket(my_socket);
+	closesocket(my_socket);
 
 	clearwinsock();
 	return 0;
