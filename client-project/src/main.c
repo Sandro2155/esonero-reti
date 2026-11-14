@@ -34,21 +34,6 @@ void clearwinsock() {
 #endif
 }
 
-
-/*
-* int recv_all(int socket, conversion_request_t* buffer, int len){
-* 	int total = 0;
-* 	while (total < len){
-* 		int n = recv(socket, buffer + total, len - total, 0);
-* 		if (n <= 0){
-* 			return n;
-* 		}
-* 		total += n;
-* 	}
-* 	return total;
-* } //returns the total length of the output
-*/
-
 int main(int argc, char *argv[]) {
 
 	// TODO: Implement client logic
@@ -75,11 +60,14 @@ int main(int argc, char *argv[]) {
 	} //just for good measure
 
 	// TODO: Configure server address
-	struct sockaddr_in client_addr;
-	memset (&client_addr, 0, sizeof(client_addr));
+	struct sockaddr_in server_addr;
+	memset (&server_addr, 0, sizeof(server_addr));
+	server_addr.sin_family = AF_INET;
+	server_addr.sin_port = htons(SERVER_PORT);
+	server_addr.sin_addr.s_addr = inet_addr(DEFAULT_SERVER_IP);
 
 	// TODO: Connect to server
-	if (connect(my_socket, (struct sockaddr *)&client_addr, sizeof(client_addr)) < 0){
+	if (connect(my_socket, (struct sockaddr *) &server_addr, sizeof(server_addr)) < 0){
 		printf("failed to connect.\n");
 		closesocket(my_socket);
 		clearwinsock();
@@ -108,12 +96,16 @@ int main(int argc, char *argv[]) {
 		return 0;
 	}
 
+	int c;
+
 	printf("\tvalore:\t");
-	scanf("%d", input_request.value);
+	scanf("%d", &c);
+
+	input_request.value = (uint32_t) c; //converts the number received as input in a 32 bit unsigned integer
 
 	htonl(input_request.value); //converts uint32_t in network byte order
 
-	if(send(my_socket, &input_request, sizeof(input_request), 0) != sizeof(input_request)) {
+	if(send(my_socket, (char *) &input_request, sizeof(input_request), 0) != sizeof(input_request)) {
 		printf("send failed or sent fewer bytes.\n");
 		closesocket(my_socket);
 		clearwinsock();
@@ -122,12 +114,8 @@ int main(int argc, char *argv[]) {
 
 	int bytes_received;
 	conversion_response_t output_response;
-	/*
-	* int total_bytes_received = 0;
-	* conversion_response_t buffer[BUFFERSIZE];
-	* memset(buffer, 0, BUFFERSIZE);
-	*/
-	if ((bytes_received = recv(my_socket, &output_response, sizeof(output_response), 0)) <= 0){
+
+	if ((bytes_received = recv(my_socket, (char *) &output_response, sizeof(output_response), 0)) <= 0){
 		printf("recv failed or connection closed prematurely.\n");
 		closesocket(my_socket);
 		clearwinsock();

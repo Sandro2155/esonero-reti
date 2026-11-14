@@ -114,30 +114,33 @@ int main(int argc, char *argv[]) {
 
 	// TODO: Implement connection acceptance loop
 	struct sockaddr_in client_addr;
-	int client_socket;
+	int addr_len = sizeof(client_addr);
+	//int client_socket;
 	 while (1) {
-		 client_socket = accept(my_socket, (struct sockaddr *) &client_addr, sizeof(client_addr));
+		 int client_socket = accept(my_socket, (struct sockaddr *) &client_addr, &addr_len);
 
-	     if(client_socket < 0){
+		 if(client_socket < 0){
 	    	 printf("accept failed.\n");
 	    	 closesocket(client_socket);
 	    	 clearwinsock();
 	    	 return 0;
 	     }
+
 	     // Handle client communication
 
 	     printf("handling client %s\n", inet_ntoa(client_addr.sin_addr));
 
 	     conversion_request_t client_request;
 	     conversion_response_t output_response;
-	     int bytes_received = recv(client_socket, &client_request, sizeof(client_request), 0);
+	     int bytes_received = recv(client_socket, (char *) &client_request, sizeof(client_request), 0);
 	     if (bytes_received > 0){
+	    	 printf("received: %s, %s, %f\n", client_request.from, client_request.to, (float) client_request.value);
 	    	 unit_t from; //saves the first unit measure
 	    	 unit_t to; //saves the second unit measure
 	    	 int f = 0; //flag
-	    	 for(int i = 0; i < sizeof(UNITS) && f == 0; i++){
+	    	 for(int i = 0; i < (sizeof(UNITS)/sizeof(UNITS[0])) && f == 0; i++){
 	    		 if (strcmp(client_request.from, UNITS[i].symbol) == 0){
-	    			 f = 1; //if it's a valid unit measure, i break the for cycle
+	    			 f = 1; //if it's a valid unit measure, i break the "for" cycle
 	    			 from = UNITS[i];
 	    		 }
 	    	 } //checks if the unit measure is valid
@@ -146,7 +149,8 @@ int main(int argc, char *argv[]) {
 	    		 output_response.value = 0;
 	    	 } //if it isn't, it returns invalid status
 	    	 else{
-	    		 for(int i = 0; i < sizeof(UNITS) && f == 0; i++){
+	    		 f = 0;
+	    		 for(int i = 0; i < (sizeof(UNITS)/sizeof(UNITS[0])) && f == 0; i++){
 	    		 	    		 if (strcmp(client_request.to, UNITS[i].symbol) == 0){
 	    		 	    			 f = 1;
 	    		 	    			 to = UNITS[i];
@@ -173,7 +177,8 @@ int main(int argc, char *argv[]) {
 	    			 } //ends third else
 	    		 } //ends second else
 	    	 } //ends first else
-	    	 send (client_socket, &output_response, sizeof(output_response), 0);
+	    	 send (client_socket, (char *)&output_response, sizeof(output_response), 0);
+	    	 printf("sent %f, %f\n", (float) output_response.status, (float) output_response.value);
 	     }//ends if
 
 	     closesocket(client_socket);
