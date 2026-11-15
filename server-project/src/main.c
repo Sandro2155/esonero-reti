@@ -131,6 +131,7 @@ int main(int argc, char *argv[]) {
 	     conversion_response_t output_response;
 	     int bytes_received = recv(client_socket, (char *) &client_request, sizeof(client_request), 0);
 	     if (bytes_received > 0){
+	    	 ntohl(client_request.value); //converts into host byte order
 	    	 printf("Richiesta '%s, %s, %f' dal client ip %s\n", client_request.from, client_request.to, (float) client_request.value, inet_ntoa(client_addr.sin_addr));
 	    	 unit_t from; //saves the first unit measure
 	    	 unit_t to; //saves the second unit measure
@@ -174,6 +175,8 @@ int main(int argc, char *argv[]) {
 	    			 } //ends third else
 	    		 } //ends second else
 	    	 } //ends first else
+	    	 htonl(output_response.status);
+	    	 htonl(output_response.value);
 	    	 send (client_socket, (char *)&output_response, sizeof(output_response), 0);
 	     }//ends if
 

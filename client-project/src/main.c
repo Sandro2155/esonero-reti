@@ -129,7 +129,7 @@ int main(int argc, char *argv[]) {
 
 	ntohl(output_response.status);
 	ntohl(output_response.value);
-	printf("%d, %d", output_response.status, output_response.value); //converts back the output and prints it
+	printf("Ricevuto risultato dal server ip %s. %d %s = %d %s", inet_ntoa(server_addr.sin_addr), input_request.value, input_request.from, output_response.value, input_request.to); //converts back the output and prints it
 
 	// TODO: Close socket
 	closesocket(my_socket);
