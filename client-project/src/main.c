@@ -78,16 +78,19 @@ int main(int argc, char *argv[]) {
 
 	conversion_request_t input_request;
 
-	printf("\tFROM\t");
-	scanf("%s", input_request.from);
-	if(strlen(input_request.from) <= 0 || strlen(input_request.from) > UNIT_LEN){
+	//printf("\tFROM\t");
+	int c = 0;
+	scanf("%s %s %d", input_request.from, input_request.to, &c);
+	if(strlen(input_request.from) <= 0 || strlen(input_request.from) > UNIT_LEN || strlen(input_request.to) <= 0 || strlen(input_request.to) > UNIT_LEN){
 		printf("invalid measure unit.\n");
 		closesocket(my_socket);
 		clearwinsock();
 		return 0;
 	}
+	input_request.value = (uint32_t) c; //converts the number received as input in a 32 bit unsigned integer
 
-	printf("\tTO\t");
+
+	/*printf("\tTO\t");
 	scanf("%s", input_request.to);
 	if(strlen(input_request.to) <= 0 || strlen(input_request.to) > UNIT_LEN){
 		printf("invalid measure unit.\n");
@@ -95,13 +98,15 @@ int main(int argc, char *argv[]) {
 		clearwinsock();
 		return 0;
 	}
+	*/
 
+	/*
 	int c;
-
 	printf("\tvalore:\t");
 	scanf("%d", &c);
+	*/
 
-	input_request.value = (uint32_t) c; //converts the number received as input in a 32 bit unsigned integer
+	//input_request.value = (uint32_t) c; //converts the number received as input in a 32 bit unsigned integer
 
 	htonl(input_request.value); //converts uint32_t in network byte order
 

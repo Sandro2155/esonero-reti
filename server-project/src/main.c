@@ -87,14 +87,14 @@ int main(int argc, char *argv[]) {
 		printf ("socket creation failed.\n");
 		clearwinsock();
 		return -1;
-	} //just for good measure
+	}
 
 	// TODO: Configure server address
 	struct sockaddr_in server_addr;
 	memset(&server_addr, 0, sizeof(server_addr));
 	server_addr.sin_family = AF_INET;
 	server_addr.sin_port = htons(SERVER_PORT);
-	server_addr.sin_addr.s_addr = htonl(INADDR_ANY);  // 0.0.0.0: accept connections on any interface (127.0.0.1 included)
+	server_addr.sin_addr.s_addr = inet_addr(DEFAULT_SERVER_IP);
 
 	// TODO: Bind socket
 	if(bind(my_socket, (struct sockaddr*) &server_addr, sizeof(server_addr)) < 0){
@@ -165,7 +165,7 @@ int main(int argc, char *argv[]) {
 	    				 output_response.value = 0;
 	    			 } //checks if the unit measures are compatible with each other
 	    			 else {
-	    				 if (client_request.value < 0 || client_request.value > MAX_VALUE){
+	    				 if (client_request.value <= 0 || client_request.value > MAX_VALUE){
 	    					 output_response.status = STATUS_INVALID_VALUE;
 	    					 output_response.value = 0;
 	    				 } //checks if the value is valid
