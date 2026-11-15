@@ -44,7 +44,7 @@ int main(int argc, char *argv[]) {
 	int result = WSAStartup(MAKEWORD(2,2), &wsa_data);
 	if (result != NO_ERROR) {
 		printf("Error at WSAStartup()\n");
-		return 0;
+		return -1;
 	}
 #endif
 
@@ -56,7 +56,7 @@ int main(int argc, char *argv[]) {
 	if (my_socket < 0){
 		printf("socket creation failed.\n");
 		clearwinsock();
-		return 0;
+		return -1;
 	} //just for good measure
 
 	// TODO: Configure server address
@@ -71,7 +71,7 @@ int main(int argc, char *argv[]) {
 		printf("failed to connect.\n");
 		closesocket(my_socket);
 		clearwinsock();
-		return 0;
+		return -1;
 	}
 
 	// TODO: Implement communication logic
@@ -109,7 +109,7 @@ int main(int argc, char *argv[]) {
 		printf("send failed or sent fewer bytes.\n");
 		closesocket(my_socket);
 		clearwinsock();
-		return 0;
+		return -1;
 	}
 
 	int bytes_received;
@@ -119,7 +119,7 @@ int main(int argc, char *argv[]) {
 		printf("recv failed or connection closed prematurely.\n");
 		closesocket(my_socket);
 		clearwinsock();
-		return 0;
+		return -1;
 	}
 
 	ntohl(output_response.status);

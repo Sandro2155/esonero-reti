@@ -75,7 +75,7 @@ int main(int argc, char *argv[]) {
 	int result = WSAStartup(MAKEWORD(2,2), &wsa_data);
 	if (result != NO_ERROR) {
 		printf("Error at WSAStartup()\n");
-		return 0;
+		return -1;
 	}
 #endif
 
@@ -86,7 +86,7 @@ int main(int argc, char *argv[]) {
 	if (my_socket < 0){
 		printf ("socket creation failed.\n");
 		clearwinsock();
-		return 0;
+		return -1;
 	} //just for good measure
 
 	// TODO: Configure server address
@@ -101,7 +101,7 @@ int main(int argc, char *argv[]) {
 		printf("bind failed.\n");
 		closesocket(my_socket);
 		clearwinsock();
-		return 0;
+		return -1;
 	} //checking if bind was successful
 
 	// TODO: Set socket to listen
@@ -109,13 +109,12 @@ int main(int argc, char *argv[]) {
 		printf("listen failed.\n");
 		closesocket (my_socket);
 		clearwinsock();
-		return 0;
+		return -1;
 	} //checking if listener was successful
 
 	// TODO: Implement connection acceptance loop
 	struct sockaddr_in client_addr;
 	int addr_len = sizeof(client_addr);
-	//int client_socket;
 	 while (1) {
 		 int client_socket = accept(my_socket, (struct sockaddr *) &client_addr, &addr_len);
 
@@ -123,7 +122,7 @@ int main(int argc, char *argv[]) {
 	    	 printf("accept failed.\n");
 	    	 closesocket(client_socket);
 	    	 clearwinsock();
-	    	 return 0;
+	    	 return -1;
 	     }
 
 	     // Handle client communication
