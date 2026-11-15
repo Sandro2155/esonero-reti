@@ -127,13 +127,11 @@ int main(int argc, char *argv[]) {
 
 	     // Handle client communication
 
-	     printf("handling client %s\n", inet_ntoa(client_addr.sin_addr));
-
 	     conversion_request_t client_request;
 	     conversion_response_t output_response;
 	     int bytes_received = recv(client_socket, (char *) &client_request, sizeof(client_request), 0);
 	     if (bytes_received > 0){
-	    	 printf("received: %s, %s, %f\n", client_request.from, client_request.to, (float) client_request.value);
+	    	 printf("Richiesta '%s, %s, %f' dal client ip %s\n", client_request.from, client_request.to, (float) client_request.value, inet_ntoa(client_addr.sin_addr));
 	    	 unit_t from; //saves the first unit measure
 	    	 unit_t to; //saves the second unit measure
 	    	 int f = 0; //flag
@@ -177,7 +175,6 @@ int main(int argc, char *argv[]) {
 	    		 } //ends second else
 	    	 } //ends first else
 	    	 send (client_socket, (char *)&output_response, sizeof(output_response), 0);
-	    	 printf("sent %f, %f\n", (float) output_response.status, (float) output_response.value);
 	     }//ends if
 
 	     closesocket(client_socket);
