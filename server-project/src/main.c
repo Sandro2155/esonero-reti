@@ -134,7 +134,8 @@ int main(int argc, char *argv[]) {
 	    	 client_request.value = ntohl(client_request.value); //converts into host byte order
 	    	 float c = 0;
 	    	 memcpy(&c, &client_request.value, sizeof(c)); //copying the 32 bytes sent in a float
-	    	 printf("Richiesta '%s, %s, %f' dal client ip %s\n", client_request.from, client_request.to, c, inet_ntoa(client_addr.sin_addr));
+	    	 printf("Richiesta '%s, %s, %.2f' dal client ip %s\n", client_request.from, client_request.to, c, inet_ntoa(client_addr.sin_addr));
+	    	 fflush(stdout);
 	    	 unit_t from; //saves the first unit measure
 	    	 unit_t to; //saves the second unit measure
 	    	 int f = 0; //flag

@@ -132,18 +132,18 @@ int main(int argc, char *argv[]) {
 	float o;
 	memcpy(&o, &output_response.value, sizeof(o));
 	if (output_response.status == STATUS_OK){
-		printf("Ricevuto risultato dal server ip %s. %f %s = %f %s\n", inet_ntoa(server_addr.sin_addr), c, input_request.from, o, input_request.to);
+		printf("Ricevuto risultato dal server ip %s. %.2f %s = %.2f %s\n", inet_ntoa(server_addr.sin_addr), c, input_request.from, o, input_request.to);
 	}
 	else{
 		if (output_response.status == STATUS_INVALID_UNIT){
-				printf("Ricevuto risultato dal server ip %s. Status: %d, valore: %f\n", inet_ntoa(server_addr.sin_addr), output_response.status, o);
+				printf("Ricevuto risultato dal server ip %s. Status: %d, valore: %.2f\n", inet_ntoa(server_addr.sin_addr), output_response.status, o);
 			}
 			else{
 				if (output_response.status == STATUS_INCOMPATIBLE_UNITS){
-						printf("Ricevuto risultato dal server ip %s. Status: %d, valore: %f", inet_ntoa(server_addr.sin_addr), output_response.status, o);
+						printf("Ricevuto risultato dal server ip %s. Status: %d, valore: %.2f", inet_ntoa(server_addr.sin_addr), output_response.status, o);
 					}
 					else{
-						printf("Ricevuto risultato dal server ip %s. Status: %d, valore: %f", inet_ntoa(server_addr.sin_addr), output_response.status, o);
+						printf("Ricevuto risultato dal server ip %s. Status: %d, valore: %.2f", inet_ntoa(server_addr.sin_addr), output_response.status, o);
 					}
 			}
 	}
