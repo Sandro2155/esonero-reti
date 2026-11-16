@@ -79,16 +79,15 @@ int main(int argc, char *argv[]) {
 	conversion_request_t input_request;
 
 	//printf("\tFROM\t");
-	int c = 0;
-	scanf("%s %s %d", input_request.from, input_request.to, &c);
+	float c = 0;
+	scanf("%s %s %f", input_request.from, input_request.to, &c);
 	if(strlen(input_request.from) <= 0 || strlen(input_request.from) > UNIT_LEN || strlen(input_request.to) <= 0 || strlen(input_request.to) > UNIT_LEN){
 		printf("invalid measure unit.\n");
 		closesocket(my_socket);
 		clearwinsock();
 		return 0;
 	}
-	input_request.value = (uint32_t) c; //converts the number received as input in a 32 bit unsigned integer
-
+	memcpy(&input_request.value, &c, sizeof(c)); //copying the same 32 bytes of the float 'c'
 
 	/*printf("\tTO\t");
 	scanf("%s", input_request.to);
@@ -108,7 +107,7 @@ int main(int argc, char *argv[]) {
 
 	//input_request.value = (uint32_t) c; //converts the number received as input in a 32 bit unsigned integer
 
-	htonl(input_request.value); //converts uint32_t in network byte order
+	input_request.value = htonl(input_request.value); //converts uint32_t in network byte order
 
 	if(send(my_socket, (char *) &input_request, sizeof(input_request), 0) != sizeof(input_request)) {
 		printf("send failed or sent fewer bytes.\n");
@@ -127,9 +126,27 @@ int main(int argc, char *argv[]) {
 		return -1;
 	}
 
-	ntohl(output_response.status);
-	ntohl(output_response.value);
-	printf("Ricevuto risultato dal server ip %s. %d %s = %d %s", inet_ntoa(server_addr.sin_addr), input_request.value, input_request.from, output_response.value, input_request.to); //converts back the output and prints it
+	//converts back both values
+	output_response.status = ntohl(output_response.status);
+	output_response.value = ntohl(output_response.value);
+	float o;
+	memcpy(&o, &output_response.value, sizeof(o));
+	if (output_response.status == STATUS_OK){
+		printf("Ricevuto risultato dal server ip %s. %f %s = %f %s\n", inet_ntoa(server_addr.sin_addr), c, input_request.from, o, input_request.to);
+	}
+	else{
+		if (output_response.status == STATUS_INVALID_UNIT){
+				printf("Ricevuto risultato dal server ip %s. Status: %d, valore: %f\n", inet_ntoa(server_addr.sin_addr), output_response.status, o);
+			}
+			else{
+				if (output_response.status == STATUS_INCOMPATIBLE_UNITS){
+						printf("Ricevuto risultato dal server ip %s. Status: %d, valore: %f", inet_ntoa(server_addr.sin_addr), output_response.status, o);
+					}
+					else{
+						printf("Ricevuto risultato dal server ip %s. Status: %d, valore: %f", inet_ntoa(server_addr.sin_addr), output_response.status, o);
+					}
+			}
+	}
 
 	// TODO: Close socket
 	closesocket(my_socket);
