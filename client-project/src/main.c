@@ -77,16 +77,25 @@ int main(int argc, char *argv[]) {
 	// TODO: Implement communication logic
 
 	conversion_request_t input_request;
-
 	float c = 0;
-	scanf("%s %s %f", input_request.from, input_request.to, &c);
-	if(strlen(input_request.from) <= 0 || strlen(input_request.from) > UNIT_LEN || strlen(input_request.to) <= 0 || strlen(input_request.to) > UNIT_LEN){
-		printf("invalid measure unit.\n");
-		closesocket(my_socket);
-		clearwinsock();
-		return 0;
+
+	if (argc == 4){
+		strcpy(input_request.from, argv[1]);
+		strcpy(input_request.to, argv[2]);
+		c = strtof(argv[3], NULL);
+		memcpy (&input_request.value, &c, sizeof(c));
 	}
-	memcpy(&input_request.value, &c, sizeof(c)); //copying the same 32 bytes of the float 'c'
+
+	else{
+		scanf("%s %s %f", input_request.from, input_request.to, &c);
+		if(strlen(input_request.from) <= 0 || strlen(input_request.from) > UNIT_LEN || strlen(input_request.to) <= 0 || strlen(input_request.to) > UNIT_LEN){
+			printf("invalid measure unit.\n");
+			closesocket(my_socket);
+			clearwinsock();
+			return 0;
+		}
+		memcpy(&input_request.value, &c, sizeof(c)); //copying the same 32 bytes of the float 'c'
+	}
 
 	input_request.value = htonl(input_request.value); //converts uint32_t in network byte order
 
